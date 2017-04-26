@@ -32,17 +32,17 @@ void bindAll(int*, int*, struct sockaddr_in*);
 
 //SA/JA: First opens a UDP socket and then handles initializing the socket address structure 
 // with the port# passed in
-void setupLogServer(int *sockudp, struct sockaddr_in *serv_addr, int portno); 
+void setupLogServer(int *sockudp, struct sockaddr_in *serv_addr, int portno, char* logip); //JA added logip 
 
 //Echos back a response upon receiving a UDP message -DY
-int echoResult_udp(char buf[256], int sockfd, struct sockaddr_in response);
+int echoResult_udp(char buf[256], int sockfd, struct sockaddr_in response, char* logip); //JA added logip
 
 //Echos back a response upon receiving a TCP message -DY
-int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response);
+int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response, char* logip); //JA added logip
 
 //SA: Handles starting the server (utilizing both TCP and UDP). Keeps server alive until a "TERM" command is issued
 // then handles safe termination of all server resources 	
-int startServer(int, int callback_tcp(char[256], int, struct sockaddr_in),
-				int callback_udp(char[256], int, struct sockaddr_in));
+int startServer(int, int callback_tcp(char[256], int, struct sockaddr_in, char* logip),
+				int callback_udp(char[256], int, struct sockaddr_in, char* logip), char* logip);
 
 #endif
