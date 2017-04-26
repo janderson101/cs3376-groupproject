@@ -15,21 +15,29 @@ int main(int argc, char *argv[])
 {
 	int pids[3] = {0};
 	int status;
+	int portNumbers = argc - 2; //JA variable to store number of port numbers
+	char* logip = argv[argc - 1]; //JA variable for the log server ip
+
 	//SW: Ensures correct usage
-	if (argc > 4 || argc < 2) 
+	if (argc > 6 || argc < 4) //JA changing the number of expected arguments.
 	{ 
 		error("Please provide up to 3 ports to monitor like so: ./server port1 port2 port3 (eg. ./server 1000, 1001, 1002)");
 		return 1;
 	}
+	//JA checking if logip argument was used
+	if (strcmp(argv[portNumbers], "-logip")) {
+	error ("Please enter a logip");
+	}
+
 	//SW:if 3 port numbers given, start server three 
-	else if (argc > 3 && (pids[0] = fork()) == 0) 
-		startServer(atoi(argv[3]), echoResult_tcp, echoResult_udp);
+	else if (portNumbers > 3 && (pids[0] = fork()) == 0) //JA changed variable name to portNumbers.
+		startServer(atoi(argv[3]), echoResult_tcp, echoResult_udp, logip); //JA added logip to pass log server ip address
 	//SW:if 2 port numbers given, start server two
-	else if (argc > 2 && (pids[1] = fork()) == 0) 
-		startServer(atoi(argv[2]), echoResult_tcp, echoResult_udp);
+	else if (portNumbers > 2 && (pids[1] = fork()) == 0) //JA changed variable name to portNumbers. 
+		startServer(atoi(argv[2]), echoResult_tcp, echoResult_udp, logip); //JA added logip to pass log server ip address
 	//SW: start server one
 	else if ((pids[2] = fork()) == 0)
-		startServer(atoi(argv[1]), echoResult_tcp, echoResult_udp);
+		startServer(atoi(argv[1]), echoResult_tcp, echoResult_udp, logip); //JA added logip to pass log server ip address
 
 	for (int i = 0; i < 3; i++) {
 		if (pids[i] != 0)
