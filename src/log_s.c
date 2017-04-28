@@ -21,7 +21,7 @@ int startLogServer(int portno)
 	serv_addr.sin_port = htons(portno);
 	if(bind(sockfd,(struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 	  error("ERROR BINDIN UDP FOR LOG SERVER");
-	//TD: continuous loop that will receieve UDP messages
+	//TD: continuous loop that will receive UDP messages
 	udp_loop(sockfd);
 	close(sockfd);
 	return 0;
