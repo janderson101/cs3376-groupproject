@@ -6,6 +6,13 @@
 
 #include <log_s.h>
 
+//TD: Issued when system call fails. Displays error message.
+void error(const char *msg)
+{
+  perror(msg);
+  exit(1);
+}
+
 //TD: starts the log server (UDP) upon being called on in the server
 int startLogServer(int portno)
 {
@@ -40,8 +47,6 @@ void udp_loop(int udp_sockfd)
 	   bzero(buf, 1024);
 	   n = recvfrom(udp_sockfd,buf,1024,0,(struct sockaddr *)&from,&fromlen);
 	   if(n<0) error("ERROR recvfrom");
-			printf("%s", buf);
-	   //TD: writes to the echo.log file and passes the message
 	   writetofile(buf);
 	   if(n<0) error("ERROR sendto");
 	}
@@ -61,8 +66,16 @@ void writetofile(char buf[1024])
 	//SW: save file
 	fclose(fw); 
 }
-int main()
+int main(int argc, char *argv[])
 {
-    startLogServer(9999);
+    if(argc != 3)
+    {
+      error("Correct usage: ./log_s -port portnum");
+      return 1;
+    }
+    //TD: Check that the user is using -port, which is not optional
+    if(strcmp(argv[1], "-port")) error("Invalid use on -port");
+    int logpo = atoi(argv[2]);
+    startLogServer(logpo);
     return 0; 
 }
