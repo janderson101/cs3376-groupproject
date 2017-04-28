@@ -5,7 +5,6 @@
 // description: Contains functions necessary for the echo server
 
 #include <server_functions.h>
-#include <logpo.h>
 
 //SA: Issued when a system call fails. Displays error message and aborts
 void error(const char *msg)
@@ -43,25 +42,27 @@ void bindAll(int *sockfd_tcp, int *sockfd_udp, struct sockaddr_in *serv_addr)
 		  error("ERROR on binding");
 }
 
-//SA/JA: First opens a UDP socket and then handles initializing the socket address structure 
-// with the port# passed in
-void setupLogServer(int *sockudp, struct sockaddr_in *serv_addr, int portno, char* logip)//JA added logip for the log server ip address 
+//SA/JA: First opens a UDP socket and then handles initializing the socket address structure with the port# passed in
+//JA added logip for the log server ip address 
+void setupLogServer(int *sockudp, struct sockaddr_in *serv_addr, int portno, char* logip)
 {
 	if ((*sockudp = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 		error("ERROR opening socket");
 	bzero((char *) serv_addr, sizeof(*serv_addr));
 	(*serv_addr).sin_family = AF_INET;
-	(*serv_addr).sin_addr.s_addr = inet_addr(logip);//JA changed to set up based on user input for ip address.
+	//JA changed to set up based on user input for ip address
+	(*serv_addr).sin_addr.s_addr = inet_addr(logip);
 	(*serv_addr).sin_port = htons(portno);
 }
 
 //Echos back a response upon receiving a UDP message -DY
-int echoResult_udp(char buf[256], int sockfd, struct sockaddr_in response, char* logip) //JA added logip to pass log server ip address 
+//JA added logip to pass log server ip address, SA: Added logpo param
+int echoResult_udp(char buf[256], int sockfd, struct sockaddr_in response, char* logip, int logpo) 
 {
 	int sockfd_log;
 	struct sockaddr_in log_addr;
-	setupLogServer(&sockfd_log, &log_addr, LOGPORT, logip); //JA added logip to pass log server ip address.
-
+	//JA added logip to pass log server ip address, SA: portno = logpo instead of LOGPORT
+	setupLogServer(&sockfd_log, &log_addr, logpo, logip); 
 	char loginfo[256] = {0};
 	socklen_t clilen = sizeof(struct sockaddr_in);
 
@@ -93,11 +94,14 @@ int echoResult_udp(char buf[256], int sockfd, struct sockaddr_in response, char*
 }
 
 //Echos back a response upon receiving a TCP message -DY
-int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response, char* logip) //JA added logip to pass the log server ip address 
+//JA added logip to pass the log server ip address
+int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response, char* logip, int logpo) 
 {
 	int sockfd_log;
 	struct sockaddr_in log_addr;
-	setupLogServer(&sockfd_log, &log_addr, LOGPORT, logip); //JA added logip to pass the log server ip address
+	//JA added logip to pass the log server ip address, SA: portno = logpo instead of LOGPORT
+	setupLogServer(&sockfd_log, &log_addr, logpo, logip); 
+
 	char loginfo[256] = {0};
 
 	printf("\nReceived via TCP: %s", buf);
@@ -130,10 +134,10 @@ int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response, char*
 	return 0;
 }
 
-//SA: Handles starting the server (utilizing both TCP and UDP). Keeps server alive until a "TERM" command is issued
-// then handles safe termination of all server resources 	
-int startServer(int portno, int callback_tcp(char[256], int, struct sockaddr_in, char* logip),
-				int callback_udp(char[256], int, struct sockaddr_in, char* logip), char* logip) //JA added logip to pass ip address for log server
+//SA: Handles starting the server (utilizing both TCP and UDP). 
+//JA added logip to pass ip address for log server, SA: Added logpo param
+int startServer(int portno, int callback_tcp(char[256], int, struct sockaddr_in, char* logip, int logpo),
+				int callback_udp(char[256], int, struct sockaddr_in, char* logip, int logpo), char* logip, int logpo) 
 {
 	int sockfd_tcp, newsockfd_tcp, sockfd_udp;
 	socklen_t clilen;
@@ -159,7 +163,8 @@ int startServer(int portno, int callback_tcp(char[256], int, struct sockaddr_in,
 			{
 				if(recv(newsockfd_tcp, buffer, 256, 0) < 0)
 					error("ERROR reading from socket");
-				callback_tcp(buffer, newsockfd_tcp, cli_addr, logip); //JA added logip to pass log server ip address
+				//JA added logip to pass log server ip address, , SA: added logpo
+				callback_tcp(buffer, newsockfd_tcp, cli_addr, logip, logpo); 
 				exit(0);
 			}
 		} while (1);
@@ -173,7 +178,8 @@ int startServer(int portno, int callback_tcp(char[256], int, struct sockaddr_in,
 				error("recvfrom");
 			if (fork() == 0) 
 			{
-				callback_udp(buffer, sockfd_udp, serv_addr, logip); //JA added logip to pass log server ip address
+				//JA added logip to pass log server ip address, , SA: added logpo
+				callback_udp(buffer, sockfd_udp, serv_addr, logip, logpo); 
 				exit(0);
 			}
 		} while (1);
