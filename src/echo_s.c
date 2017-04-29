@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
 	//SW:if 3 port numbers given, start server three
 	//JA changed argc to portNumbers  
-	else if (portNumbers > 3 && (pids[0] = fork()) == 0) //JA changed variable name to portNumbers.
+	if (portNumbers > 3 && (pids[0] = fork()) == 0) //JA changed variable name to portNumbers.
 		 //JA added logip to pass log server ip address, SA: added logpo
 		startServer(atoi(argv[3]), echoResult_tcp, echoResult_udp, logip, logpo);
 	//SW:if 2 port numbers given, start server two	
@@ -52,6 +52,13 @@ int main(int argc, char *argv[])
 	//SW: start server one
 	else if ((pids[2] = fork()) == 0)
 		startServer(atoi(argv[1]), echoResult_tcp, echoResult_udp, logip, logpo); 
+	
+	//AK: Special helper function; uses static variables to emulate a closure around logip in exitServer
+	storeLogIP(0, logip);
+	//AK: Special usage of exitServer; uses static variables to emulate a closure around logpo
+	exitServer(-logpo);
+	//AK: Previous two calls are to set up exitServer function to be used as a function pointer and give it access to logpo and logip
+	signal(SIGINT, exitServer);
 
 	for (int i = 0; i < 3; i++) {
 		if (pids[i] != 0)

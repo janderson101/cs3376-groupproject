@@ -13,6 +13,53 @@ void error(const char *msg)
     exit(1);
 }
 
+//AK:
+// ***IMPORTANT NOTE***
+// The added complexity of the following two functions is REQUIRED to get the behavior requested.
+// This is mainly due to the fact that C does not have any closures, and passing local variables to a function pointer is otherwise impossible
+// The call to signal(SIGINT, func) only takes a function pointer, and since that function must also communicate with a server whose location
+// is determined by the user, the only way to achieve such a behavior is to use static variables and a "storing function" which takes those
+// variables and stores them until exitServer requires them. This way, no matter how exitServer is called (directly or through reference),
+// it will have access to logpo and logip set by the user. I have attempted doing this with a global static variable, but such code always 
+// segfaults, and tracing reveals that those variables, although set in the main() method, are not passed on to the exitServer function.
+
+//AK: Special function used to close logip_f within persistent scope until it must be retrieved
+char* storeLogIP(int get, char* logip_f) {
+	//AK: Variable must be static in order to remain present between function calls
+	static char logip[256] = {0};
+	//AK: If we are setting the initial value of logip, then get is 0
+	if (get == 0) {
+		strcpy(logip, logip_f);
+		return NULL;
+	}
+	//AK: Otherwise return stored copy of logip
+	return logip;
+}
+
+//AK: Special function used to close logpo within persistent scope and retrieve stored value of logip int storeLogIP
+void exitServer(int sig) {
+	//AK: Variable must be static in order to preserve value between function calls
+	static int logpo;
+	int sockfd_log;
+	struct sockaddr_in log_addr;
+	//AK: A negative signal value is used to give initial value to logpo
+	if (sig < 0) {
+		logpo = -sig;
+		return;
+	}
+	//AK: Retrieve stored value of logip
+	char* logip = storeLogIP(1, NULL);
+	//JA added logip to pass log server ip address, SA: portno = logpo instead of LOGPORT
+	setupLogServer(&sockfd_log, &log_addr, logpo, logip); 
+	socklen_t clilen = sizeof(struct sockaddr_in);
+	char* loginfo = "echo_s is stopping";
+	if (sendto(sockfd_log, loginfo, strlen(loginfo), 0, (struct sockaddr*)&log_addr, clilen) < 0)
+		error("ERROR sendto");
+	printf("\nTerminating echo server here and log server at %s\n", logip);
+	exit(0);
+
+}
+		
 //TD: initializes the TCP and UDP sockets
 void intializeSockets(int *socktcp, int *sockudp) 
 {
