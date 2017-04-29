@@ -46,16 +46,17 @@ void udp_loop(int udp_sockfd)
 	{
 	   bzero(buf, 1024);
 	   n = recvfrom(udp_sockfd,buf,1024,0,(struct sockaddr *)&from,&fromlen);
+	   printf("%s", buf);
 	   if(n<0) error("ERROR recvfrom");
-	   if (strcmp(buf, "echo_s is stopping") == 0)
-	   		return;
-	   writetofile(buf);
+	   //if (strcmp(buf, "echo_s is stopping") == 0)
+	   //		return;
+	   writetofile(buf, udp_sockfd);//passes the message from echo_s and the socket file desc. in case the message is the shutdown message
 	}
 }
 
 //SW: function to write to file
 //function accepts "buf", the message and ip address, and write to file "echo.log"
-void writetofile(char buf[1024])
+void writetofile(char buf[1024], int sockfd)
 {
 	FILE *fw;
 	//SW: makes echo.log it if does not exist, append to it if it does
@@ -66,7 +67,12 @@ void writetofile(char buf[1024])
 	fprintf(fw,"%d-%d-%d %d:%d:%d\t%s\n", t.tm_year+1900, t.tm_mon+1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, buf); //SW: write date, message, and ipaddress to file
 	//SW: save file
 	fclose(fw); 
+	if(strcmp(buf,"echo_s is stopping") == 0){
+		printf("log server recieve shutdown command from echo_s, closing now");
+		close(sockfd);
+	}	
 }
+
 int main(int argc, char *argv[])
 {
     if(argc != 3)
