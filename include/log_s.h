@@ -33,6 +33,6 @@ void udp_loop(int);
 
 //SW: function to write to file
 //function accepts "buf", the message and ip address, and write to file "echo.log"
-void writetofile(char[1024]);
+void writetofile(char[1024], int);
 
 #endif

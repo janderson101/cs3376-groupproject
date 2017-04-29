@@ -56,7 +56,7 @@ void exitServer(int sig) {
 	if (sendto(sockfd_log, loginfo, strlen(loginfo), 0, (struct sockaddr*)&log_addr, clilen) < 0)
 		error("ERROR sendto");
 	printf("\nTerminating echo server here and log server at %s\n", logip);
-	exit(0);
+	//exit(0);
 
 }
 		
@@ -136,7 +136,7 @@ int echoResult_udp(char buf[256], int sockfd, struct sockaddr_in response, char*
 			error("ERROR recvfrom");
 		printf("\nRecieved via UDP: %s", buf);
 	}
-	close(sockfd_log);
+	//close(sockfd_log);
 	return 0;
 }
 
@@ -177,7 +177,7 @@ int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response, char*
 			break;
 		printf("\nReceived via TCP: %s", buf);
 	}
-	close(sockfd_log);
+	//close(sockfd_log);
 	return 0;
 }
 
