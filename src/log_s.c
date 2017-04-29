@@ -46,16 +46,15 @@ void udp_loop(int udp_sockfd)
 	{
 	   bzero(buf, 1024);
 	   n = recvfrom(udp_sockfd,buf,1024,0,(struct sockaddr *)&from,&fromlen);
-	   if(n<0) error("ERROR recvfrom");
-	   if (strcmp(buf, "echo_s is stopping") == 0)
-	   		return;
-	   writetofile(buf);
+	   if(n<0) exit(0);
+	   writetofile(buf, udp_sockfd);//passes the message from echo_s and the socket file desc. in case the message is the shutdown message
 	}
 }
 
 //SW: function to write to file
 //function accepts "buf", the message and ip address, and write to file "echo.log"
-void writetofile(char buf[1024])
+//int sockfd is the socket file descr. for the server. needed if shut down message is send
+void writetofile(char buf[1024], int sockfd)
 {
 	FILE *fw;
 	//SW: makes echo.log it if does not exist, append to it if it does
@@ -63,10 +62,17 @@ void writetofile(char buf[1024])
 	time_t ti = time(NULL);
 	//SW: get the time 
 	struct tm t = *localtime(&ti); 
-	fprintf(fw,"%d-%d-%d %d:%d:%d\t%s\n", t.tm_year+1900, t.tm_mon+1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, buf); //SW: write date, message, and ipaddress to file
+	if(strcmp(buf,"echo_s is stopping") == 0){// if message is the term message, log it and stop server
+		printf("log server recieve shutdown command from echo_s, closing now\n");
+		fprintf(fw, "%s\n", buf); //SW: write exit message
+		close(sockfd);
+	} else {//log all messages send to echo_s
+		fprintf(fw,"%d-%d-%d %d:%d:%d\t%s\n", t.tm_year+1900, t.tm_mon+1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, buf); //SW: write date, message, and ipaddress to file
+	}
 	//SW: save file
 	fclose(fw); 
 }
+
 int main(int argc, char *argv[])
 {
     if(argc != 3)
