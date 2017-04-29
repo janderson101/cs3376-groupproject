@@ -53,7 +53,9 @@ int main(int argc, char *argv[])
 	else if ((pids[2] = fork()) == 0)
 		startServer(atoi(argv[1]), echoResult_tcp, echoResult_udp, logip, logpo); 
 	
+	//AK: Special helper function; uses static variables to emulate a closure around logip in exitServer
 	storeLogIP(0, logip);
+	//AK: Special usage of exitServer; uses static variables to emulate a closure around logpo
 	exitServer(-logpo);
 	signal(SIGINT, exitServer);
 

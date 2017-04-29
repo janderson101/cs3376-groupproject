@@ -1,4 +1,4 @@
-obj/*
+obj/*.o
 echo_s
 echo_c
 log_s
