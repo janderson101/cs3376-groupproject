@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
 	storeLogIP(0, logip);
 	//AK: Special usage of exitServer; uses static variables to emulate a closure around logpo
 	exitServer(-logpo);
+	//AK: Previous two calls are to set up exitServer function to be used as a function pointer and give it access to logpo and logip
 	signal(SIGINT, exitServer);
 
 	for (int i = 0; i < 3; i++) {
