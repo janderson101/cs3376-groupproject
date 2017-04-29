@@ -13,6 +13,33 @@ void error(const char *msg)
     exit(1);
 }
 
+char* storeLogIP(int get, char* logip_f) {
+	static char logip[256] = {0};
+	if (get == 0) {
+		strcpy(logip, logip_f);
+		return NULL;
+	}
+	return logip;
+}
+
+void exitServer(int sig) {
+	static int logpo;
+	int sockfd_log;
+	struct sockaddr_in log_addr;
+	if (sig < 0) {
+		logpo = -sig;
+		return;
+	}
+	char* logip = storeLogIP(1, NULL);
+	//JA added logip to pass log server ip address, SA: portno = logpo instead of LOGPORT
+	setupLogServer(&sockfd_log, &log_addr, logpo, logip); 
+	socklen_t clilen = sizeof(struct sockaddr_in);
+	char* loginfo = "echo_s is stopping";
+	if (sendto(sockfd_log, loginfo, strlen(loginfo), 0, (struct sockaddr*)&log_addr, clilen) < 0)
+		error("ERROR sendto");
+	exit(0);
+}
+		
 //TD: initializes the TCP and UDP sockets
 void intializeSockets(int *socktcp, int *sockudp) 
 {

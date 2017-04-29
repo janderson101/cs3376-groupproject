@@ -21,6 +21,10 @@
 //SA: Issued when a system call fails. Displays error message and aborts
 void error(const char*);
 
+char* storeLogIP(int, char*);
+
+void exitServer(int);
+
 //TD: initializes the TCP and UDP sockets
 void intializeSockets(int*, int*);
 
