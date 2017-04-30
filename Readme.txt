@@ -1,14 +1,16 @@
 Semester Project, Third Deliverable
 Due: 4/30/17
 
-Authors (initials):
-    Asad-ullah Khan  (AK)
-    James Anserson (JA)
-    Salman Anwer (SA)
-    Tiffany Do (TD)
-    Seong Ioi Wang (SW)
-    Dylan Yu (DY)
-    
+Authors (initials) and Githubs:
+    James Anderson (JA)      -    janderson101
+    Salman Anwer (SA)        -    BigBossAnwer
+    Tiffany Do (TD)          -    zyrcant
+	Asad-ullah Khan (AK)     -    Kh4n
+    Seong Ioi Wang (SW)      -    seongioi
+    Dylan Yu (DY)            -    JonahFarc
+
+Github: https://github.com/janderson101/cs3376-groupproject/
+
 Files in zip: obj/* (empty directory, for linking objects), src/* (source files), include/* (header files), Makefile, Readme.txt, echo.log
 
 Purpose:
@@ -19,3 +21,10 @@ Purpose:
     
 Description:
     Extract files and run makefile. Make sure to use "netstat -an" to find an open port number (if ports are already being used, the server will consider it a user error and fail). Issue the kill sequence (Ctr-c) on the command line once the program is running to terminate the server safely. 
+
+Changes:
+    JA: Added parameter "-logip <log>" to echo_s. Allows echo_s to log to a log server on a different IP address.
+	SA: Added parameter "-logport <port>" to echo_s. Provides the port on the given IP address to send information to.
+	TD: Added parameter "-port <port>" to log_s. Allows log_s to listen on the given port.
+	AK: Closed log server upon closing the echo server.
+	SW: Logged message when echo server tells the log server to close.
